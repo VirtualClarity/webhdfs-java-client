@@ -155,14 +155,17 @@ class PseudoWebHDFSConnection implements WebHDFSConnection {
 		HttpURLConnection conn = authenticatedURL.openConnection(createQualifiedUrl(spec), token);
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Content-Type", "application/octet-stream");
-		conn.connect();
-
-		Streams.copy(conn.getInputStream(), os);
 		
-		String resp = result(conn, false);
-		conn.disconnect();
-
-		return resp;
+		try {
+			conn.connect();
+	
+			Streams.copy(conn.getInputStream(), os);
+			
+			return result(conn, false);
+		}
+		finally {
+			conn.disconnect();
+		}
 	}
 
 	/**
