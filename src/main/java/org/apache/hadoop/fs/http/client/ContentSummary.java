@@ -85,7 +85,7 @@ public class ContentSummary {
 		return new TypeAdapter<ContentSummary>() {
 			@Override
 			public void write(JsonWriter out, ContentSummary value) throws IOException {
-				/* not implemented */
+				// not implemented
 			}
 
 			@Override

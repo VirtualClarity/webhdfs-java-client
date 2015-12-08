@@ -57,7 +57,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String getHomeDirectory() throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse getHomeDirectory() throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>OPEN</b>
@@ -70,7 +70,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public  String open(String path, OutputStream os) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse open(String path, OutputStream os) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>GETCONTENTSUMMARY</b>
@@ -83,7 +83,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public  String getContentSummary(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse getContentSummary(String path) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>LISTSTATUS</b>
@@ -96,7 +96,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public  String listStatus(String path) throws MalformedURLException, IOException, AuthenticationException;
+	public WebHDFSResponse listStatus(String path) throws MalformedURLException, IOException, AuthenticationException;
 	
 	/**
 	 * <b>GETFILESTATUS</b>
@@ -109,7 +109,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public  String getFileStatus(String path) throws MalformedURLException, IOException, AuthenticationException;
+	public WebHDFSResponse getFileStatus(String path) throws MalformedURLException, IOException, AuthenticationException;
 	
 	/**
 	 * <b>GETFILECHECKSUM</b>
@@ -122,7 +122,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public  String getFileCheckSum(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse getFileCheckSum(String path) throws MalformedURLException, IOException, AuthenticationException ;
 	
 /*
  * ========================================================================
@@ -142,7 +142,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String create(String path, InputStream is) throws MalformedURLException, IOException, AuthenticationException;
+	public WebHDFSResponse create(String path, InputStream is) throws MalformedURLException, IOException, AuthenticationException;
 	
 	/**
 	 * <b>MKDIRS</b>
@@ -155,7 +155,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String mkdirs(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse mkdirs(String path) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>CREATESYMLINK</b>
@@ -169,7 +169,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String createSymLink(String srcPath, String destPath) throws MalformedURLException, IOException, AuthenticationException ;		
+	public WebHDFSResponse createSymLink(String srcPath, String destPath) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>RENAME</b>
@@ -183,7 +183,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String rename(String srcPath, String destPath) throws MalformedURLException, IOException, AuthenticationException ;	
+	public WebHDFSResponse rename(String srcPath, String destPath) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>SETPERMISSION</b>
@@ -197,7 +197,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String setPermission(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse setPermission(String path) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>SETOWNER</b>
@@ -211,7 +211,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String setOwner(String path) throws MalformedURLException, IOException, AuthenticationException;
+	public WebHDFSResponse setOwner(String path) throws MalformedURLException, IOException, AuthenticationException;
 	
 	/**
 	 * <b>SETREPLICATION</b>
@@ -225,7 +225,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String setReplication(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse setReplication(String path) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	/**
 	 * <b>SETTIMES</b>
@@ -239,7 +239,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String setTimes(String path) throws MalformedURLException, IOException, AuthenticationException;
+	public WebHDFSResponse setTimes(String path) throws MalformedURLException, IOException, AuthenticationException;
 	
 /*
  * ========================================================================
@@ -255,7 +255,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String append(String path, InputStream is) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse append(String path, InputStream is) throws MalformedURLException, IOException, AuthenticationException ;
 /*
  * ========================================================================
  * DELETE	
@@ -273,7 +273,7 @@ public interface WebHDFSConnection {
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public String delete(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	public WebHDFSResponse delete(String path) throws MalformedURLException, IOException, AuthenticationException ;
 	
 	
 	

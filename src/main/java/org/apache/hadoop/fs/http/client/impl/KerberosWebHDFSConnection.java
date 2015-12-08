@@ -10,20 +10,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.hadoop.fs.http.client.WebHDFSConnection;
 import org.apache.hadoop.fs.http.client.WebHDFSConnectionFactory;
+import org.apache.hadoop.fs.http.client.WebHDFSResponse;
 import org.apache.hadoop.fs.http.client.util.URLUtil;
 import org.apache.hadoop.security.authentication.client.AuthenticatedURL;
 import org.apache.hadoop.security.authentication.client.AuthenticatedURL.Token;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
-import org.apache.hadoop.security.authentication.client.Authenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
 
 /**
  * 
@@ -68,9 +64,6 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	private Token token = new AuthenticatedURL.Token();
 	private AuthenticatedURL authenticatedURL = new AuthenticatedURL(new KerberosAuthenticator2(principal, password));
 
-	public KerberosWebHDFSConnection() {
-	}
-
 	public KerberosWebHDFSConnection(String httpfsUrl, String principal, String password) {
 		this.httpfsUrl = httpfsUrl;
 		this.principal = principal;
@@ -104,7 +97,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	protected static long copy(InputStream input, OutputStream result) throws IOException {
 		byte[] buffer = new byte[12288]; // 8K=8192 12K=12288 64K=
 		long count = 0L;
-		int n = 0;
+		int n;
 		while (-1 != (n = input.read(buffer))) {
 			result.write(buffer, 0, n);
 			count += n;
@@ -117,17 +110,17 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	/**
 	 * Report the result in JSON way
 	 * 
-	 * @param conn
-	 * @param input
-	 * @return
+	 * @param conn The HTTP connection object to use for the connection
+	 * @param output Whether or not output is expected
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws IOException
 	 */
-	private static String result(HttpURLConnection conn, boolean input) throws IOException {
-		StringBuffer sb = new StringBuffer();
-		if (input) {
+	private static WebHDFSResponse result(HttpURLConnection conn, boolean output) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		if (output) {
 			InputStream is = conn.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
-			String line = null;
+			String line;
 
 			while ((line = reader.readLine()) != null) {
 				sb.append(line);
@@ -135,29 +128,8 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 			reader.close();
 			is.close();
 		}
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("code", conn.getResponseCode());
-		result.put("mesg", conn.getResponseMessage());
-		result.put("type", conn.getContentType());
-		result.put("data", sb);
 		
-		//
-		// Convert a Map into JSON string.
-		//
-		Gson gson = new Gson();
-		String json = gson.toJson(result);
-		logger.info("json = " + json);
-
-		//
-		// Convert JSON string back to Map.
-		//
-		// Type type = new TypeToken<Map<String, Object>>(){}.getType();
-		// Map<String, Object> map = gson.fromJson(json, type);
-		// for (String key : map.keySet()) {
-		// System.out.println("map.get = " + map.get(key));
-		// }
-
-		return json;
+		return new WebHDFSResponse(conn.getResponseCode(), conn.getResponseMessage(), conn.getContentType(), sb.toString());		
 	}
 
 	public void ensureValidToken() {
@@ -185,19 +157,19 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/?op=GETHOMEDIRECTORY"
 	 * 
-	 * @return
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String getHomeDirectory() throws MalformedURLException, IOException, AuthenticationException {
+	public WebHDFSResponse getHomeDirectory() throws IOException, AuthenticationException {
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(new URL(new URL(httpfsUrl),
 				"/webhdfs/v1/?op=GETHOMEDIRECTORY"), token);
 		conn.connect();
 
-		String resp = result(conn, true);
+		WebHDFSResponse resp = result(conn, true);
 		conn.disconnect();
 		return resp;
 	}
@@ -208,13 +180,13 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -L "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=OPEN
 	 * [&offset=<LONG>][&length=<LONG>][&buffersize=<INT>]"
 	 * 
-	 * @param path
-	 * @param os
+	 * @param path The HDFS path to the file to be opened 
+	 * @param os An output stream object to write to 
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String open(String path, OutputStream os) throws MalformedURLException, IOException, AuthenticationException {
+	public WebHDFSResponse open(String path, OutputStream os) throws IOException, AuthenticationException {
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -227,7 +199,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		copy(is, os);
 		is.close();
 		os.close();
-		String resp = result(conn, false);
+		WebHDFSResponse resp = result(conn, false);
 		conn.disconnect();
 
 		return resp;
@@ -238,13 +210,13 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETCONTENTSUMMARY"
 	 * 
-	 * @param path
-	 * @return
+	 * @param path The HDFS path to the object to get a summary for
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String getContentSummary(String path) throws MalformedURLException, IOException, AuthenticationException {
+	public WebHDFSResponse getContentSummary(String path) throws IOException, AuthenticationException {
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -253,7 +225,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		conn.setRequestMethod("GET");
 		// conn.setRequestProperty("Content-Type", "application/octet-stream");
 		conn.connect();
-		String resp = result(conn, true);
+		WebHDFSResponse resp = result(conn, true);
 		conn.disconnect();
 
 		return resp;
@@ -263,14 +235,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * <b>LISTSTATUS</b>
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=LISTSTATUS"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the directory to list the contents of
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String listStatus(String path) throws MalformedURLException, IOException, AuthenticationException {
+	public WebHDFSResponse listStatus(String path) throws IOException, AuthenticationException {
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -278,7 +250,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 						URLUtil.encodePath(path))), token);
 		conn.setRequestMethod("GET");
 		conn.connect();
-		String resp = result(conn, true);
+		WebHDFSResponse resp = result(conn, true);
 		conn.disconnect();
 
 		return resp;
@@ -288,14 +260,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * <b>GETFILESTATUS</b>
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETFILESTATUS"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the file to the list the status of
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String getFileStatus(String path) throws MalformedURLException, IOException, AuthenticationException {
+	public WebHDFSResponse getFileStatus(String path) throws IOException, AuthenticationException {
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -303,7 +275,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 						URLUtil.encodePath(path))), token);
 		conn.setRequestMethod("GET");
 		conn.connect();
-		String resp = result(conn, true);
+		WebHDFSResponse resp = result(conn, true);
 		conn.disconnect();
 
 		return resp;
@@ -314,14 +286,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETFILECHECKSUM"
 	 * 
-	 * @param path
-	 * @return
+	 * @param path The HDFS path to the file to get a checksum for
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String getFileCheckSum(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse getFileCheckSum(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -348,16 +320,16 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * [&overwrite=<true|false>][&blocksize=<LONG>][&replication=<SHORT>]
 	 * [&permission=<OCTAL>][&buffersize=<INT>]"
 	 * 
-	 * @param path
-	 * @param is
-	 * @return
+	 * @param path The HDFS path at which the file should be created
+	 * @param is The InputStream to read the data from
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String create(String path, InputStream is) throws MalformedURLException, IOException,
+	public WebHDFSResponse create(String path, InputStream is) throws IOException,
 			AuthenticationException {
-		String resp = null;
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		String redirectUrl = null;
@@ -373,7 +345,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		if (conn.getResponseCode() == 307)
 			redirectUrl = conn.getHeaderField("Location");
 		conn.disconnect();
-
+		System.out.println(redirectUrl);
 		if (redirectUrl != null) {
 			conn = authenticatedURL.openConnection(new URL(redirectUrl), token);
 			conn.setRequestMethod("PUT");
@@ -404,14 +376,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X PUT
 	 * "http://<HOST>:<PORT>/<PATH>?op=MKDIRS[&permission=<OCTAL>]"
 	 * 
-	 * @param path
-	 * @return
+	 * @param path The path to the directory to make, including any missing parents
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String mkdirs(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse mkdirs(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL
@@ -432,15 +404,16 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=CREATESYMLINK
 	 * &destination=<PATH>[&createParent=<true|false>]"
 	 * 
-	 * @param path
-	 * @return
+	 * @param srcPath  The HDFS path that the link will point to
+	 * @param destPath The HDFS path that the link will be created at
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String createSymLink(String srcPath, String destPath) throws MalformedURLException, IOException,
+	public WebHDFSResponse createSymLink(String srcPath, String destPath) throws IOException,
 			AuthenticationException {
-		String resp = null;
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -460,15 +433,16 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=RENAME
 	 * &destination=<PATH>[&createParent=<true|false>]"
 	 * 
-	 * @param path
-	 * @return
+	 * @param srcPath The HDFS path to the object to be renamed
+	 * @param destPath The new HDFS path that the object should be renamed to
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String rename(String srcPath, String destPath) throws MalformedURLException, IOException,
+	public WebHDFSResponse rename(String srcPath, String destPath) throws IOException,
 			AuthenticationException {
-		String resp = null;
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -488,14 +462,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETPERMISSION
 	 * [&permission=<OCTAL>]"
 	 * 
-	 * @param path
-	 * @return
+	 * @param path The HDFS path to the object upon which permissions should be set
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String setPermission(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse setPermission(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -515,14 +489,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETOWNER
 	 * [&owner=<USER>][&group=<GROUP>]"
 	 * 
-	 * @param path
-	 * @return
+	 * @param path The HDFS path to the object of which the owner should be set
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String setOwner(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse setOwner(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -541,15 +515,17 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETREPLICATION
 	 * [&replication=<SHORT>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * TODO: Does this make any sense without a replication factor?
+	 *
+	 * @param path The HDFS path to the object for which replication should be set.
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String setReplication(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse setReplication(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -568,15 +544,17 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETTIMES
 	 * [&modificationtime=<TIME>][&accesstime=<TIME>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * TODO: Does this make any sense without the times?
+	 *
+	 * @param path The HDFS path to the object for which to set the times
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String setTimes(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse setTimes(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL.openConnection(
@@ -599,16 +577,16 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X POST
 	 * "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=APPEND[&buffersize=<INT>]"
 	 * 
-	 * @param path
-	 * @param is
-	 * @return
+	 * @param path The HDFS path to the file which should be appended to
+	 * @param is The InputStream to read data from
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public String append(String path, InputStream is) throws MalformedURLException, IOException,
+	public WebHDFSResponse append(String path, InputStream is) throws IOException,
 			AuthenticationException {
-		String resp = null;
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		String redirectUrl = null;
@@ -658,14 +636,14 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * curl -i -X DELETE "http://<host>:<port>/webhdfs/v1/<path>?op=DELETE
 	 * [&recursive=<true|false>]"
 	 * 
-	 * @param path
-	 * @return
+	 * @param path The HDFS path to the object to be deleted
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 */
-	public String delete(String path) throws MalformedURLException, IOException, AuthenticationException {
-		String resp = null;
+	public WebHDFSResponse delete(String path) throws IOException, AuthenticationException {
+		WebHDFSResponse resp;
 		ensureValidToken();
 
 		HttpURLConnection conn = authenticatedURL

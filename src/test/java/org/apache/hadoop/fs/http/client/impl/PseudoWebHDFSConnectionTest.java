@@ -32,7 +32,7 @@ public class PseudoWebHDFSConnectionTest {
 		pConn = new PseudoWebHDFSConnection(String.format("http://hdfs-01:%s", WebHDFSConnectionFactory.DEFAULT_PORT), USER, "n/a");
 	}
 
-	@Test
+/*	@Test
 	public void getHomeDirectory() throws MalformedURLException, IOException, AuthenticationException {
 		String response = pConn.getHomeDirectory();
 		unmarshalResponse(response);
@@ -90,5 +90,5 @@ public class PseudoWebHDFSConnectionTest {
 		assertThat(String.format("WebHDFS request failed: %s", responseMap.get(ResponseUtil.MESSAGE)), actualCode, is(equalTo(expectedCode)));
 
 		return (String)responseMap.get(ResponseUtil.CONTENT);
-	}
+	}*/
 }
