@@ -1,6 +1,6 @@
 # webhdfs-java-client
 
-Hadoop [WebHDFS][1] REST API's java client code with kerberos auth.
+Hadoop [WebHDFS][1] REST APIs java client code with kerberos auth.
 
 ## Basic Usage
 
