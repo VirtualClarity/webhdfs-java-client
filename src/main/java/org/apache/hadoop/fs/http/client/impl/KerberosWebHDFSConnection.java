@@ -374,7 +374,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * <b>MKDIRS</b>
 	 * 
 	 * curl -i -X PUT
-	 * "http://<HOST>:<PORT>/<PATH>?op=MKDIRS[&permission=<OCTAL>]"
+	 * "http://<HOST>:<PORT>/webhdfs/v1/<PATH>/webhdfs/v1/?op=MKDIRS[&permission=<OCTAL>]"
 	 * 
 	 * @param path The path to the directory to make, including any missing parents
 	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
@@ -401,7 +401,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	/**
 	 * <b>CREATESYMLINK</b>
 	 * 
-	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=CREATESYMLINK
+	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=CREATESYMLINK
 	 * &destination=<PATH>[&createParent=<true|false>]"
 	 * 
 	 * @param srcPath  The HDFS path that the link will point to
@@ -430,7 +430,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	/**
 	 * <b>RENAME</b>
 	 * 
-	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=RENAME
+	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=RENAME
 	 * &destination=<PATH>[&createParent=<true|false>]"
 	 * 
 	 * @param srcPath The HDFS path to the object to be renamed

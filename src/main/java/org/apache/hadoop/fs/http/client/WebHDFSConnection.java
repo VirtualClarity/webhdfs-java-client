@@ -147,7 +147,7 @@ public interface WebHDFSConnection {
 	/**
 	 * <b>MKDIRS</b>
 	 * 
-	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=MKDIRS[&permission=<OCTAL>]"
+	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=MKDIRS[&permission=<OCTAL>]"
 	 * 
 	 * @param path
 	 * @return
@@ -160,7 +160,7 @@ public interface WebHDFSConnection {
 	/**
 	 * <b>CREATESYMLINK</b>
 	 * 
-	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=CREATESYMLINK
+	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=CREATESYMLINK
                               &destination=<PATH>[&createParent=<true|false>]"
 	 * 
 	 * @param path
@@ -174,7 +174,7 @@ public interface WebHDFSConnection {
 	/**
 	 * <b>RENAME</b>
 	 * 
-	 * curl -i -X PUT "http://<HOST>:<PORT>/<PATH>?op=RENAME
+	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=RENAME
                               &destination=<PATH>[&createParent=<true|false>]"
 	 * 
 	 * @param path

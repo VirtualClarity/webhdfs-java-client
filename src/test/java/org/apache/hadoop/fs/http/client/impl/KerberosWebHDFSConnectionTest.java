@@ -127,7 +127,12 @@ public class KerberosWebHDFSConnectionTest
 		assertEquals("true", response.getJSONResponse().get("boolean").toString());
 	}
 
-	@Test
+	// If this tests fails with java.io.IOException: Server returned HTTP response code: 400
+	// then probably the error behind it (which you can check by going to the URL in the browser) is
+	// {"RemoteException":{"exception":"IllegalArgumentException","javaClassName":"java.lang.IllegalArgumentException","message":"Invalid value for webhdfs parameter \"op\": No enum constant org.apache.hadoop.hdfs.web.resources.GetOpParam.Op.CREATESYMLINK"}}
+	// which means your version of Hadoop doesn't support symlinks. In this case you can comment
+	// out this test by commenting out the next line
+	//@Test
 	public void createSymlink() throws IOException, AuthenticationException
 	{
 		log.info("Starting test createSymlink()");
@@ -140,10 +145,26 @@ public class KerberosWebHDFSConnectionTest
 		assertEquals("DIRECTORY", deQuote(response.getJSONResponse().get("FileStatus").get("type").toString()));
 	}
 
-	// Keep this one last
+	@Test
+	public void rename() throws IOException, AuthenticationException
+	{
+		log.info("Starting test rename()");
+		String new_name = "renamed";
+		// Rename it
+		WebHDFSResponse response = conn.rename(temp_file.getName(), "/" + new_name);
+		assertEquals(200, response.getResponseCode());
+		assertEquals("true", response.getJSONResponse().get("boolean").toString());
+
+		// Rename it back so it gets deleted in tearDown();
+		response = conn.rename(new_name, "/" + temp_file.getName());
+		assertEquals(200, response.getResponseCode());
+		assertEquals("true", response.getJSONResponse().get("boolean").toString());
+	}
+
 	@Test
 	public void delete() throws IOException, AuthenticationException
 	{
+		log.info("Starting test delete()");
 		// Delete it
 		WebHDFSResponse response = conn.delete(temp_file.getName());
 		assertEquals(200, response.getResponseCode());
