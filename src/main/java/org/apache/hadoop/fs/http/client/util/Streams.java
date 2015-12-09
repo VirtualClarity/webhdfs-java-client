@@ -71,7 +71,7 @@ public class Streams {
 	 * 			the {@link InputStream} 
 	 * @param outstream
 	 * 			the {@link OutputStream}
-	 * @return A {@link long} containing the number of bytes that were copied
+	 * @return A long containing the number of bytes that were copied
 	 * @throws IOException
 	 */
 	public static long copy(InputStream instream, OutputStream outstream) throws IOException {
