@@ -22,7 +22,7 @@ import java.io.OutputStream;
 
 public class Streams {
 	
-	public static final int EIGHT_K		= 8192;
+	//public static final int EIGHT_K		= 8192;
 	public static final int	TWELVE_K	= 12288;
 	
 	/**
@@ -46,14 +46,14 @@ public class Streams {
 	 * @throws IOException
 	 */
 	public static StringBuilder toStringBuilder(InputStream is) throws IOException {
-		String line = null;
+		String line;
 		BufferedReader reader = null;
 		StringBuilder sb = new StringBuilder();
 
 		try {
 			reader = new BufferedReader(new InputStreamReader(is));
 
-			while ((line = reader.readLine()) != null) {
+			while (null != (line = reader.readLine())) {
 				sb.append(line);
 			}
 		}
@@ -71,11 +71,11 @@ public class Streams {
 	 * 			the {@link InputStream} 
 	 * @param outstream
 	 * 			the {@link OutputStream}
-	 * @return
+	 * @return A {@link long} containing the number of bytes that were copied
 	 * @throws IOException
 	 */
 	public static long copy(InputStream instream, OutputStream outstream) throws IOException {
-		int n = 0;
+		int n;
 		long count = 0L;
 		byte[] buffer = new byte[TWELVE_K];
 		

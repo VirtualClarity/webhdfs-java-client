@@ -461,7 +461,9 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETPERMISSION
 	 * [&permission=<OCTAL>]"
-	 * 
+	 *
+	 * TODO: Does this make any sense without new permissions?
+	 *
 	 * @param path The HDFS path to the object upon which permissions should be set
 	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException
@@ -488,7 +490,9 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETOWNER
 	 * [&owner=<USER>][&group=<GROUP>]"
-	 * 
+	 *
+	 * TODO: Does this make any sense without a new owner?
+	 *
 	 * @param path The HDFS path to the object of which the owner should be set
 	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException

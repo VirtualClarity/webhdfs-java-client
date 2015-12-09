@@ -52,77 +52,78 @@ public interface WebHDFSConnection {
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/?op=GETHOMEDIRECTORY"
 	 * 
-	 * @return
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse getHomeDirectory() throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse getHomeDirectory() throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>OPEN</b>
 	 * 
 	 * curl -i -L "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=OPEN
 	                    [&offset=<LONG>][&length=<LONG>][&buffersize=<INT>]"
-	 * @param path
-	 * @param os
+	 * @param path The HDFS path to the file to be opened
+	 * @param os An output stream object to write to
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse open(String path, OutputStream os) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse open(String path, OutputStream os) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>GETCONTENTSUMMARY</b>
 	 * 
 	 * curl -i "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETCONTENTSUMMARY"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the object to get a summary for
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse getContentSummary(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse getContentSummary(String path) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>LISTSTATUS</b>
 	 * 
 	 * curl -i  "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=LISTSTATUS"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the directory to list the contents of
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse listStatus(String path) throws MalformedURLException, IOException, AuthenticationException;
+	 WebHDFSResponse listStatus(String path) throws IOException, AuthenticationException;
 	
 	/**
 	 * <b>GETFILESTATUS</b>
 	 * 
 	 * curl -i  "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETFILESTATUS"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the file to the list the status of
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse getFileStatus(String path) throws MalformedURLException, IOException, AuthenticationException;
+	 WebHDFSResponse getFileStatus(String path) throws IOException, AuthenticationException;
 	
 	/**
 	 * <b>GETFILECHECKSUM</b>
 	 * 
 	 * curl -i  "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETFILECHECKSUM"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the file to get a checksum for
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse getFileCheckSum(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse getFileCheckSum(String path) throws IOException, AuthenticationException ;
 	
 /*
  * ========================================================================
@@ -135,111 +136,111 @@ public interface WebHDFSConnection {
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=CREATE
                     [&overwrite=<true|false>][&blocksize=<LONG>][&replication=<SHORT>]
                     [&permission=<OCTAL>][&buffersize=<INT>]"
-	 * @param path
-	 * @param is
-	 * @return
+	 * @param path The HDFS path at which the file should be created
+	 * @param is The InputStream to read the data from
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse create(String path, InputStream is) throws MalformedURLException, IOException, AuthenticationException;
+	 WebHDFSResponse create(String path, InputStream is) throws IOException, AuthenticationException;
 	
 	/**
 	 * <b>MKDIRS</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=MKDIRS[&permission=<OCTAL>]"
-	 * 
-	 * @param path
-	 * @return
-	 * @throws AuthenticationException 
+	 *
+	 * @param path The path to the directory to make, including any missing parents
+	 * @throws AuthenticationException
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse mkdirs(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse mkdirs(String path) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>CREATESYMLINK</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=CREATESYMLINK
                               &destination=<PATH>[&createParent=<true|false>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param srcPath  The HDFS path that the link will point to
+	 * @param destPath The HDFS path that the link will be created at
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse createSymLink(String srcPath, String destPath) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse createSymLink(String srcPath, String destPath) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>RENAME</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=RENAME
                               &destination=<PATH>[&createParent=<true|false>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param srcPath The HDFS path to the object to be renamed
+	 * @param destPath The new HDFS path that the object should be renamed to
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse rename(String srcPath, String destPath) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse rename(String srcPath, String destPath) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>SETPERMISSION</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETPERMISSION
                               [&permission=<OCTAL>]"
-	 * 
-	 * @param path
-	 * @return
-	 * @throws AuthenticationException 
+	 *
+	 * @param path The HDFS path to the object upon which permissions should be set
+	 * @throws AuthenticationException
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse setPermission(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse setPermission(String path) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>SETOWNER</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETOWNER
                               [&owner=<USER>][&group=<GROUP>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the object of which the owner should be set
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse setOwner(String path) throws MalformedURLException, IOException, AuthenticationException;
+	 WebHDFSResponse setOwner(String path) throws IOException, AuthenticationException;
 	
 	/**
 	 * <b>SETREPLICATION</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETREPLICATION
                               [&replication=<SHORT>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the object for which replication should be set.
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse setReplication(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse setReplication(String path) throws IOException, AuthenticationException ;
 	
 	/**
 	 * <b>SETTIMES</b>
 	 * 
 	 * curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=SETTIMES
                               [&modificationtime=<TIME>][&accesstime=<TIME>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the object for which to set the times
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse setTimes(String path) throws MalformedURLException, IOException, AuthenticationException;
+	 WebHDFSResponse setTimes(String path) throws IOException, AuthenticationException;
 	
 /*
  * ========================================================================
@@ -248,14 +249,14 @@ public interface WebHDFSConnection {
  */
 	/**
 	 * curl -i -X POST "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=APPEND[&buffersize=<INT>]"
-	 * @param path
-	 * @param is
-	 * @return
+	 * @param path The HDFS path to the file which should be appended to
+	 * @param is The InputStream to read data from
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse append(String path, InputStream is) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse append(String path, InputStream is) throws IOException, AuthenticationException ;
 /*
  * ========================================================================
  * DELETE	
@@ -266,14 +267,14 @@ public interface WebHDFSConnection {
 	 * 
 	 * curl -i -X DELETE "http://<host>:<port>/webhdfs/v1/<path>?op=DELETE
                               [&recursive=<true|false>]"
-	 * 
-	 * @param path
-	 * @return
+	 *
+	 * @param path The HDFS path to the object to be deleted
+	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 * @throws MalformedURLException 
 	 */
-	public WebHDFSResponse delete(String path) throws MalformedURLException, IOException, AuthenticationException ;
+	 WebHDFSResponse delete(String path) throws IOException, AuthenticationException ;
 	
 	
 	
