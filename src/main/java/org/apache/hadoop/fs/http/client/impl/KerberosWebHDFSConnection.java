@@ -138,7 +138,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		} else {
 			long currentTime = new Date().getTime();
 			long tokenExpired = Long.parseLong(token.toString().split("&")[3].split("=")[1]);
-			logger.info("[currentTime vs. tokenExpired] " + currentTime + " " + tokenExpired);
+			logger.trace("[currentTime vs. tokenExpired] " + currentTime + " " + tokenExpired);
 
 			if (currentTime > tokenExpired) { // if the token is expired
 				token = generateToken(httpfsUrl, principal, password);
