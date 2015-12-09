@@ -175,14 +175,55 @@ public class KerberosWebHDFSConnectionTest
 		conn.getFileStatus(temp_file.getName());
 	}
 
+	@Test
+	public void append() throws IOException, AuthenticationException
+	{
+		log.info("Starting test append()");
+		// The temp file has already been uploaded. If we upload the same content again, we should double its length
+		FileInputStream is = new FileInputStream(temp_file);
+		WebHDFSResponse response = conn.append(temp_file.getName(), is);
+		is.close();
+		assertEquals(200, response.getResponseCode());
+
+		response = conn.getFileStatus(temp_file.getName());
+		assertEquals(200, response.getResponseCode());
+		assertEquals(in_text_bytes*2, response.getJSONResponse().get("FileStatus").get("length").asInt());
+	}
+
+	//@Test
+	public void setPermission() throws IOException, AuthenticationException
+	{
+		log.info("Starting test setPermission()");
+		// TODO - I believe the implementation currently lacks the ability to pass in a permission
+		// This will need to be rectified before this test can be run
+	}
+
+	//@Test
+	public void setOwner() throws IOException, AuthenticationException
+	{
+		log.info("Starting test setPermission()");
+		// TODO - I believe the implementation currently lacks the ability to pass in an owner
+		// This will need to be rectified before this test can be run
+	}
+
+	//@Test
+	public void setReplication() throws IOException, AuthenticationException
+	{
+		log.info("Starting test setPermission()");
+		// TODO - I believe the implementation currently lacks the ability to pass in a replication factor
+		// This will need to be rectified before this test can be run
+	}
+
+	//@Test
+	public void setTimes() throws IOException, AuthenticationException
+	{
+		log.info("Starting test setPermission()");
+		// TODO - I believe the implementation currently lacks the ability to pass in a time
+		// This will need to be rectified before this test can be run
+	}
+
 	private String deQuote(String s)
 	{
 		return s.substring(1, s.length() -1);
-	}
-
-	private void putTestFile() throws IOException, AuthenticationException
-	{
-		FileInputStream is = new FileInputStream(temp_file);
-		WebHDFSResponse response = conn.create(temp_file.getName(), is);
 	}
 }
