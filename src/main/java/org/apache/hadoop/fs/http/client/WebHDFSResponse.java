@@ -2,12 +2,7 @@ package org.apache.hadoop.fs.http.client;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.*;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Map;
 
 /*
  * Copyright Virtual Clarity Limited 2015.
@@ -59,6 +54,19 @@ public class WebHDFSResponse
 		return mapper.readTree(response);
 	}
 
+	// It would be nice if this package only had one JSON library, GSON or Jackson.
+	// Unfortunately GSON it for deserializing into types, which measn you need to
+	// tell it a lot about the structure you are expecting. This isn't useful for
+	// a class like this where the response could contain lots of different JSON
+	// structures. Jackson on the other hand deserialises into a generic tree of
+	// JsonNodes and does a decent job of guessing primitive types. If we use GSON
+	// this library has to recognise the structure and sort it out (nicer for the#
+	// user), if we use Jackson the user using this library has to deal with it (faster
+	// for us).
+	//
+	// Some work on providing proper classes has been done in ContentSummary and FileStatus
+	// If in future we want it be nicer, we can go back to Gson. For now I'm doing
+	// it the quick way.
 	/*public static Map<String, Object> toMap(String json) {
 		Gson gson = new Gson();
 		Type type = new TypeToken<Map<String, Object>>() {}.getType();

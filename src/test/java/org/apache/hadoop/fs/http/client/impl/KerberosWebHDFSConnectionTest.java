@@ -71,7 +71,7 @@ public class KerberosWebHDFSConnectionTest
 		// List it to check it's there and has the correct size
 		WebHDFSResponse response = conn.getFileStatus(temp_file.getName());
 		assertEquals(200, response.getResponseCode());
-		assertEquals(in_text_bytes, response.getJSONResponse().get("FileStatus").get("length").asInt());
+		assertEquals(in_text_bytes, response.getJSONResponse().get("FileStatus") .get("length").asInt());
 
 		// Bring it back and check it is the same as what we put up
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
