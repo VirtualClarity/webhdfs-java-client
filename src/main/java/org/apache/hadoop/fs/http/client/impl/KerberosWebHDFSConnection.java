@@ -340,7 +340,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		conn.setRequestMethod("PUT");
 		conn.setInstanceFollowRedirects(false);
 		conn.connect();
-		logger.info("Location:" + conn.getHeaderField("Location"));
+		logger.trace("Location:" + conn.getHeaderField("Location"));
 		resp = result(conn, true);
 		if (conn.getResponseCode() == 307)
 			redirectUrl = conn.getHeaderField("Location");

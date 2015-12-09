@@ -22,27 +22,41 @@ public class KerberosWebHDFSConnectionTest
 	static String principal = "fUcacfba0f0c29445d8284096097f925e1";
 	static String password = "pea6e2d22-6e00-4101-b0d0-584765f3ed68";
 	String user = "dr.who";
-	String in_text = "This is some\nmulti-line\ntext. And it has some funny characters. Olé\n";
+	static String in_text = "This is some\nmulti-line\ntext. And it has some funny characters. Olé\n";
 	int in_text_bytes = 69;						// How many bytes the text above takes up
 	static File temp_file;
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
-	@BeforeClass
-	public static void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception
+	{
+//		log.info("Creating temp file");
 		conn = new KerberosWebHDFSConnection("http://" + host + ":" + port, principal, password);
-		temp_file= File.createTempFile("test", ".txt");
+		temp_file = File.createTempFile("test", ".txt");
+		// Put some text in a file
+		PrintWriter out = new PrintWriter(temp_file);
+		out.print(in_text);
+		out.close();
+		// Put it in the cluster
+		FileInputStream is = new FileInputStream(temp_file);
+		WebHDFSResponse response = conn.create(temp_file.getName(), is);
+		assertEquals(201, response.getResponseCode());
+		assertEquals("Created", response.getResponseMessage());
 	}
 
-	@AfterClass
-	public static void tearDown() throws Exception {
-		temp_file.delete();
+	@After
+	public void tearDown() throws Exception {
+//		log.info("Deleting temp file");
+		WebHDFSResponse response = conn.delete(temp_file.getName());			// delete remote
+		temp_file.delete();														// delete local
 	}
 
 	@Test
 	public void getHomeDirectory() throws IOException, AuthenticationException
 	{
+		log.info("Starting test getHomeDirectory()");
 		WebHDFSResponse response = conn.getHomeDirectory();
 		assertEquals(200, response.getResponseCode());
 		assertEquals("/user/" + user, deQuote(response.getJSONResponse().get("Path").toString()));
@@ -51,26 +65,17 @@ public class KerberosWebHDFSConnectionTest
 	@Test
 	public void createListOpen() throws  IOException, AuthenticationException
 	{
-		// Put some text in a file
-		PrintWriter out = new PrintWriter(temp_file);
-		out.print(in_text);
-		out.close();
-
-		// Push that file up
-		FileInputStream is = new FileInputStream(temp_file);
-		String path = temp_file.getName();
-		WebHDFSResponse response = conn.create(path, is);
-		assertEquals(201, response.getResponseCode());
-		assertEquals("Created", response.getResponseMessage());
+		log.info("Starting test createListOpen()");
+		// File was already created in test set up
 
 		// List it to check it's there and has the correct size
-		response = conn.getFileStatus(path);
+		WebHDFSResponse response = conn.getFileStatus(temp_file.getName());
 		assertEquals(200, response.getResponseCode());
 		assertEquals(in_text_bytes, response.getJSONResponse().get("FileStatus").get("length").asInt());
 
 		// Bring it back and check it is the same as what we put up
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		response = conn.open(path, os);
+		response = conn.open(temp_file.getName(), os);
 		assertEquals(200, response.getResponseCode());
 		assertEquals(in_text, os.toString());
 
@@ -79,6 +84,7 @@ public class KerberosWebHDFSConnectionTest
 	@Test
 	public void getContentSummary() throws IOException, AuthenticationException
 	{
+		log.info("Starting test getContentSummary()");
 		WebHDFSResponse response = conn.getContentSummary(temp_file.getName());
 		assertEquals(200, response.getResponseCode());
 		assertEquals(in_text_bytes, response.getJSONResponse().get("ContentSummary").get("length").asInt());
@@ -87,6 +93,7 @@ public class KerberosWebHDFSConnectionTest
 	@Test
 	public void getFileCheckSum() throws IOException, AuthenticationException
 	{
+		log.info("Starting test getFileCheckSum()");
 		WebHDFSResponse response = conn. getFileCheckSum(temp_file.getName());
 		assertEquals(200, response.getResponseCode());
 		// TODO In theory we should probably do the same checksum on the local file, but the checksum
@@ -96,6 +103,7 @@ public class KerberosWebHDFSConnectionTest
 	@Test
 	public void mkdirs() throws IOException, AuthenticationException
 	{
+		log.info("Starting test mkdirs()");
 		log.info("Making directories");
 		String dir1 = "test-" + (new Random()).nextInt(10000);
 		String dir2 = "test-" + (new Random()).nextInt(10000);
@@ -122,7 +130,14 @@ public class KerberosWebHDFSConnectionTest
 	@Test
 	public void createSymlink() throws IOException, AuthenticationException
 	{
+		log.info("Starting test createSymlink()");
+		String link_name = "link";
+		WebHDFSResponse response = conn.createSymLink(temp_file.getName(), link_name);
+		assertEquals(200, response.getResponseCode());
 
+		response = conn.getFileStatus(link_name);
+		assertEquals(200, response.getResponseCode());
+		assertEquals("DIRECTORY", deQuote(response.getJSONResponse().get("FileStatus").get("type").toString()));
 	}
 
 	// Keep this one last
@@ -144,4 +159,9 @@ public class KerberosWebHDFSConnectionTest
 		return s.substring(1, s.length() -1);
 	}
 
+	private void putTestFile() throws IOException, AuthenticationException
+	{
+		FileInputStream is = new FileInputStream(temp_file);
+		WebHDFSResponse response = conn.create(temp_file.getName(), is);
+	}
 }
