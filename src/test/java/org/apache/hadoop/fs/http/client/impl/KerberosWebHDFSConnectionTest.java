@@ -200,6 +200,11 @@ public class KerberosWebHDFSConnectionTest
 		// List it to make sure it has gone
 		exception.expect(FileNotFoundException.class);
 		conn.getFileStatus(temp_file.getName());
+
+		// Delete a non-existant file
+		response = conn.delete("slafjsdkfjlsdajlsdj");
+		assertEquals(200, response.getResponseCode());
+		assertEquals("false", response.getJSONResponse().get("boolean").toString());
 	}
 
 	@Test
