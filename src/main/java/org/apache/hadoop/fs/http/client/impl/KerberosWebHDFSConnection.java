@@ -345,7 +345,6 @@ public class KerberosWebHDFSConnection implements WebHDFSConnection {
 		if (conn.getResponseCode() == 307)
 			redirectUrl = conn.getHeaderField("Location");
 		conn.disconnect();
-		System.out.println(redirectUrl);
 		if (redirectUrl != null) {
 			conn = authenticatedURL.openConnection(new URL(redirectUrl), token);
 			conn.setRequestMethod("PUT");
@@ -386,10 +385,8 @@ public class KerberosWebHDFSConnection implements WebHDFSConnection {
 		WebHDFSResponse resp;
 		ensureValidToken();
 
-		HttpURLConnection conn = authenticatedURL
-				.openConnection(
-						new URL(new URL(httpfsUrl), MessageFormat.format("/webhdfs/v1/{0}?op=MKDIRS",
-								URLUtil.encodePath(path))), token);
+		URL end_url = new URL(new URL(httpfsUrl), MessageFormat.format("/webhdfs/v1/{0}?op=MKDIRS",	URLUtil.encodePath(path)));
+		HttpURLConnection conn = authenticatedURL.openConnection(end_url, token);
 		conn.setRequestMethod("PUT");
 		conn.connect();
 		resp = result(conn, true);
