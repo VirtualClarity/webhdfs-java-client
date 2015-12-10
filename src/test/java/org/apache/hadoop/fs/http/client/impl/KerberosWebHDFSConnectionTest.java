@@ -128,15 +128,17 @@ public class KerberosWebHDFSConnectionTest
 	}
 
 	// If this tests fails with java.io.IOException: Server returned HTTP response code: 400
-	// then probably the error behind it (which you can check by going to the URL in the browser) is
-	// {"RemoteException":{"exception":"IllegalArgumentException","javaClassName":"java.lang.IllegalArgumentException","message":"Invalid value for webhdfs parameter \"op\": No enum constant org.apache.hadoop.hdfs.web.resources.GetOpParam.Op.CREATESYMLINK"}}
+	// then probably the error behind it is
+	// {"RemoteException":{"exception":"UnsupportedOperationException","javaClassName":"java.lang.UnsupportedOperationException","message":"Symlinks not supported"}}
 	// which means your version of Hadoop doesn't support symlinks. In this case you can comment
-	// out this test by commenting out the next line
+	// out this test by commenting out the next line. You can verify this like this:
+	//
+	// curl -i -X PUT "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=CREATESYMLINK&destination=<PATH>[&createParent=<true|false>]"
 	//@Test
 	public void createSymlink() throws IOException, AuthenticationException
 	{
 		log.info("Starting test createSymlink()");
-		String link_name = "link";
+		String link_name = "/link";
 		WebHDFSResponse response = conn.createSymLink(temp_file.getName(), link_name);
 		assertEquals(200, response.getResponseCode());
 
