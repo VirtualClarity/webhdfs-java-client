@@ -322,21 +322,23 @@ public class KerberosWebHDFSConnection implements WebHDFSConnection {
 	 * 
 	 * @param path The HDFS path at which the file should be created
 	 * @param is The InputStream to read the data from
+	 * @param overwrite Whether or not to overwrite an existing file with the same name
 	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse create(String path, InputStream is) throws IOException,
+	public WebHDFSResponse create(String path, InputStream is, boolean overwrite) throws IOException,
 			AuthenticationException {
 		WebHDFSResponse resp;
 		ensureValidToken();
 
 		String redirectUrl = null;
-		HttpURLConnection conn = authenticatedURL
-				.openConnection(
-						new URL(new URL(httpfsUrl), MessageFormat.format("/webhdfs/v1/{0}?op=CREATE",
-								URLUtil.encodePath(path))), token);
+		String arguments = overwrite ? "&overwrite=true" : "&overwrite=false";
+		URL end_url = new URL(new URL(httpfsUrl), MessageFormat.format("/webhdfs/v1/{0}?op=CREATE{1}",
+				URLUtil.encodePath(path), arguments));
+		logger.debug(end_url.toString());
+		HttpURLConnection conn = authenticatedURL.openConnection(end_url, token);
 		conn.setRequestMethod("PUT");
 		conn.setInstanceFollowRedirects(false);
 		conn.connect();

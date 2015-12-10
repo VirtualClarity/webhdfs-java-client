@@ -254,15 +254,17 @@ class PseudoWebHDFSConnection implements WebHDFSConnection {
 	 *
 	 * @param path The HDFS path at which the file should be created
 	 * @param is The InputStream to read the data from
+	 * @param overwrite Whether or not to overwrite an existing file with the same name
 	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	public WebHDFSResponse create(String path, InputStream is) throws IOException, AuthenticationException {
+	public WebHDFSResponse create(String path, InputStream is, boolean overwrite) throws IOException, AuthenticationException {
 		WebHDFSResponse resp;
 		ensureValidToken();
-		String spec = MessageFormat.format("/webhdfs/v1/{0}?op=CREATE&user.name={1}", URLUtil.encodePath(path), this.principal);
+		String arguments = overwrite ? "&overwrite=true" : "&overwrite=false";
+		String spec = MessageFormat.format("/webhdfs/v1/{0}?op=CREATE&user.name={1}{2}", URLUtil.encodePath(path), this.principal, arguments);
 		String redirectUrl = null;
 		
 		HttpURLConnection conn = authenticatedURL.openConnection(createQualifiedUrl(spec), token);

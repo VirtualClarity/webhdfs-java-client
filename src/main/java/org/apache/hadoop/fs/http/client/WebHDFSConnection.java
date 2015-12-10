@@ -138,12 +138,13 @@ public interface WebHDFSConnection {
                     [&permission=<OCTAL>][&buffersize=<INT>]"
 	 * @param path The HDFS path at which the file should be created
 	 * @param is The InputStream to read the data from
+	 * @param overwrite Whether or not to overwrite an existing file with the same name
 	 * @return The response from the endpoint, wrapped in an {@link WebHDFSResponse}
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	 WebHDFSResponse create(String path, InputStream is) throws IOException, AuthenticationException;
+	 WebHDFSResponse create(String path, InputStream is, boolean overwrite) throws IOException, AuthenticationException;
 	
 	/**
 	 * <b>MKDIRS</b>

@@ -11,6 +11,8 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.tree.ExpandVetoException;
+
 
 public class KerberosWebHDFSConnectionTest
 {
@@ -25,9 +27,11 @@ public class KerberosWebHDFSConnectionTest
 	static String in_text = "This is some\nmulti-line\ntext. And it has some funny characters. Olé\n";
 	int in_text_bytes = 69;						// How many bytes the text above takes up
 	static File temp_file;
+	public final ExpectedException no_exception = ExpectedException.none();
+
 
 	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+	public final ExpectedException exception = no_exception;
 
 	@Before
 	public void setUp() throws Exception
@@ -41,7 +45,7 @@ public class KerberosWebHDFSConnectionTest
 		out.close();
 		// Put it in the cluster
 		FileInputStream is = new FileInputStream(temp_file);
-		WebHDFSResponse response = conn.create(temp_file.getName(), is);
+		WebHDFSResponse response = conn.create(temp_file.getName(), is, false);
 		assertEquals(201, response.getResponseCode());
 		assertEquals("Created", response.getResponseMessage());
 	}
@@ -79,6 +83,27 @@ public class KerberosWebHDFSConnectionTest
 		assertEquals(200, response.getResponseCode());
 		assertEquals(in_text, os.toString());
 
+	}
+
+	@Test
+	public void createWithOverwrite() throws  IOException, AuthenticationException
+	{
+		log.info("Starting test createListOpen()");
+		// File was already created in test set up
+
+		// Send it up again without an overwrite should give us an IOException
+		FileInputStream is = new FileInputStream(temp_file);
+		WebHDFSResponse response = conn.create(temp_file.getName(), is, false);
+		assertEquals(403, response.getResponseCode());
+		assertEquals("Forbidden", response.getResponseMessage());
+		log.debug(response.getResponseCode() + " " + response.getResponseMessage());
+
+		// Send it up again with an overwrite should be OK
+		is = new FileInputStream(temp_file);
+		response = conn.create(temp_file.getName(), is, true);
+		assertEquals(201, response.getResponseCode());
+		assertEquals("Created", response.getResponseMessage());
+		is.close();
 	}
 
 	@Test
