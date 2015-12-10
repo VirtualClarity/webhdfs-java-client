@@ -52,7 +52,7 @@ APPEND (see FileSystem.append)
 DELETE (see FileSystem.delete)
 
  */
-class KerberosWebHDFSConnection implements WebHDFSConnection {
+public class KerberosWebHDFSConnection implements WebHDFSConnection {
 
 	protected static final Logger logger = LoggerFactory.getLogger(KerberosWebHDFSConnection.class);
 
@@ -340,7 +340,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		conn.setRequestMethod("PUT");
 		conn.setInstanceFollowRedirects(false);
 		conn.connect();
-		logger.trace("Location:" + conn.getHeaderField("Location"));
+		logger.trace("Redirected to:" + conn.getHeaderField("Location"));
 		resp = result(conn, true);
 		if (conn.getResponseCode() == 307)
 			redirectUrl = conn.getHeaderField("Location");
@@ -599,7 +599,7 @@ class KerberosWebHDFSConnection implements WebHDFSConnection {
 		conn.setRequestMethod("POST");
 		conn.setInstanceFollowRedirects(false);
 		conn.connect();
-		logger.info("Location:" + conn.getHeaderField("Location"));
+		logger.trace("Redirected to:" + conn.getHeaderField("Location"));
 		resp = result(conn, true);
 		if (conn.getResponseCode() == 307)
 			redirectUrl = conn.getHeaderField("Location");
