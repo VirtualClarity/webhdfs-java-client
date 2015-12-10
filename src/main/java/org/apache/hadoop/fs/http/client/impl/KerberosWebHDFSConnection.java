@@ -347,7 +347,8 @@ public class KerberosWebHDFSConnection implements WebHDFSConnection {
 		if (conn.getResponseCode() == 307)
 			redirectUrl = conn.getHeaderField("Location");
 		conn.disconnect();
-		if (redirectUrl != null) {
+		if (redirectUrl != null)
+		{
 			conn = authenticatedURL.openConnection(new URL(redirectUrl), token);
 			conn.setRequestMethod("PUT");
 			conn.setDoOutput(true);
@@ -360,11 +361,18 @@ public class KerberosWebHDFSConnection implements WebHDFSConnection {
 			conn.setFixedLengthStreamingMode(_SIZE);
 			conn.connect();
 			OutputStream os = conn.getOutputStream();
-			copy(is, os);
-			// Util.copyStream(is, os);
-			is.close();
-			os.close();
-			resp = result(conn, false);
+			try
+			{
+				copy(is, os);
+				// Util.copyStream(is, os);
+				is.close();
+				os.close();
+				resp = result(conn, false);
+			}
+			catch (IOException e)
+			{
+				resp = new WebHDFSResponse(conn.getResponseCode(), conn.getResponseMessage(), null, null);
+			}
 			conn.disconnect();
 		}
 

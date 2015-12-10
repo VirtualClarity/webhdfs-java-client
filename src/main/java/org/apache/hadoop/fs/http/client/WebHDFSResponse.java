@@ -46,7 +46,7 @@ public class WebHDFSResponse
 
 	public JsonNode getJSONResponse() throws IOException
 	{
-		if(!content_type.equals("application/json"))
+		if(content_type != null && !content_type.equals("application/json"))
 		{
 			throw new JsonParseException("Content type not application/json", null);
 		}
